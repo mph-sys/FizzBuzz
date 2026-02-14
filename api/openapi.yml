@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: FizzBuzz Service API
+  description: API for generating FizzBuzz sequences and tracking usage statistics.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /fizzbuzz/run:
+    post:
+      summary: Generate FizzBuzz sequence
+      parameters:
+        - in: query
+          name: int1
+          schema:
+            type: integer
+          required: true
+          description: First multiple
+        - in: query
+          name: int2
+          schema:
+            type: integer
+          required: true
+          description: Second multiple
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: true
+          description: Limit of the sequence
+        - in: query
+          name: str1
+          schema:
+            type: string
+          required: true
+          description: String to replace multiples of int1
+        - in: query
+          name: str2
+          schema:
+            type: string
+          required: true
+          description: String to replace multiples of int2
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseSuccessStringArray'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /fizzbuzz/stats/most-requested:
+    get:
+      summary: Get most requested statistics
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseSuccessStats'
+        '500':
+          description: Error retrieving stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+components:
+  schemas:
+    ResponseSuccessStringArray:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: string
+    ResponseSuccessStats:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            int1:
+              type: integer
+            int2:
+              type: integer
+            limit:
+              type: integer
+            str1:
+              type: string
+            str2:
+              type: string
+            hits:
+              type: integer
+    ResponseError:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
