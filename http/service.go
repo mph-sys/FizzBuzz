@@ -5,27 +5,35 @@ import (
 	"log"
 	"net/http"
 	"test-lbc/http/handlers"
+	"test-lbc/prometheus"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	db       *sql.DB
-	bindAddr string
+	db                 *sql.DB
+	bindAddr           string
+	prometheusBindAddr string
 
 	router *gin.Engine
 }
 
-func New(db *sql.DB, bindAddr string) *Server {
+func New(db *sql.DB, bindAddr, prometheusBindAddr string) *Server {
 	return &Server{
-		db:       db,
-		bindAddr: bindAddr,
+		db:                 db,
+		bindAddr:           bindAddr,
+		prometheusBindAddr: prometheusBindAddr,
 	}
 }
 
 func (s *Server) Start() error {
 	log.Printf("start http server on port %s", s.bindAddr)
+
+	if s.prometheusBindAddr != "" {
+		go prometheus.Start(s.prometheusBindAddr)
+	}
+
 	gin.SetMode(gin.ReleaseMode)
 	s.router = gin.New()
 	s.loadRoutes()
@@ -36,7 +44,9 @@ func (s *Server) Start() error {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+
 	server.ListenAndServe()
+
 	return nil
 }
 

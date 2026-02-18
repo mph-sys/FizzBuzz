@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"test-lbc/http"
 
 	"github.com/spf13/cobra"
@@ -19,31 +20,41 @@ var httpCmd = &cobra.Command{
 }
 
 var (
-	bindAddr string
-	mysqlDSN string
+	bindAddr           string
+	prometheusBindAddr string
+	sqlHost            string
+	sqlDB              string
 )
 
 func init() {
 	httpCmd.Flags().StringVarP(&bindAddr, "bind-addr", "b", ":8080", "Http port")
-	httpCmd.PersistentFlags().StringVar(&mysqlDSN, "mysql-dsn", "", "MySQL DSN to connect to DB")
+	httpCmd.Flags().StringVarP(&prometheusBindAddr, "prometheus-bind-addr", "", ":2112", "prometheus metrics port")
+	httpCmd.PersistentFlags().StringVar(&sqlHost, "mysql-host", "localhost", "MySQL host")
+	httpCmd.PersistentFlags().StringVar(&sqlDB, "mysql-db", "", "MySQL database")
+	httpCmd.MarkPersistentFlagRequired("mysql-db")
 }
 
 func startHttpServer(cmd *cobra.Command, args []string) {
-	db, err := getDB(mysqlDSN)
+	db, err := getDB(sqlHost, sqlDB)
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = http.New(db, bindAddr).Start()
+
+	err = http.New(db, bindAddr, prometheusBindAddr).Start()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func getDB(dsn string) (*sql.DB, error) {
-	// return nil, nil
+func getDB(sqlHost, sqlDB string) (*sql.DB, error) {
+	user := os.Getenv("MYSQL_USER")
+	password := os.Getenv("MYSQL_PASSWORD")
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", user, password, sqlHost, sqlDB)
+
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to mysql db : %s", err.Error())
 	}
+
 	return db, nil
 }
