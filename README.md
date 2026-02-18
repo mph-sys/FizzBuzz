@@ -27,9 +27,10 @@ export MYSQL_PASSWORD=password
 
 #### Flags
 
-- `--mysql-dsn` (string): MySQL Data Source Name (required for persistence).
+- `--mysql-db`, `-d` (string): MySQL DB name(required for persistence).
+- `--mysql-host`, `-h` (string): MySQL host (default "localhost").
 - `--bind-addr`, `-b` (string): Address to bind the server to (default ":8080").
-- `--prometheus-bind-addr` (string): Address to bind the prometheus metrics server to (default ":2112").
+- `--prometheus-bind-addr`, `-p` (string): Address to bind the prometheus metrics server to (default ":2112").
 
 ## Features
 
