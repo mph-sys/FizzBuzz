@@ -40,14 +40,23 @@ func (s FizzBuzzService) Run(params models.FizzBuzzParams) ([]string, error) {
 	}
 
 	for i := range result {
-		switch {
-		case currentValue%(int1TestValue*int2TestValue) == 0:
-			result[i] = params.Str1 + params.Str2
-		case currentValue%int1TestValue == 0:
+		// switch {
+		// case currentValue%(int1TestValue*int2TestValue) == 0:
+		// 	result[i] = params.Str1 + params.Str2
+		// case currentValue%int1TestValue == 0:
+		// 	result[i] = params.Str1
+		// case currentValue%int2TestValue == 0:
+		// 	result[i] = params.Str2
+		// default:
+		// 	result[i] = strconv.Itoa(currentValue)
+		// }
+		if currentValue%int1TestValue == 0 {
 			result[i] = params.Str1
-		case currentValue%int2TestValue == 0:
-			result[i] = params.Str2
-		default:
+		}
+		if currentValue%int2TestValue == 0 {
+			result[i] += params.Str2
+		}
+		if result[i] == "" {
 			result[i] = strconv.Itoa(currentValue)
 		}
 		currentValue++
