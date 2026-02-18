@@ -29,7 +29,7 @@ var (
 func init() {
 	httpCmd.Flags().StringVarP(&bindAddr, "bind-addr", "b", ":8080", "Http port")
 	httpCmd.Flags().StringVarP(&prometheusBindAddr, "prometheus-bind-addr", "p", ":2112", "prometheus metrics port")
-	httpCmd.PersistentFlags().StringVarP(&sqlHost, "mysql-host", "h", "localhost", "MySQL host")
+	httpCmd.PersistentFlags().StringVarP(&sqlHost, "mysql-host", "H", "localhost", "MySQL host")
 	httpCmd.PersistentFlags().StringVarP(&sqlDB, "mysql-db", "d", "", "MySQL database")
 
 	httpCmd.MarkPersistentFlagRequired("mysql-db")
