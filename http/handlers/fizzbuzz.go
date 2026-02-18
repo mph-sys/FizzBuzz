@@ -2,39 +2,66 @@ package handlers
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	"strconv"
 	"test-lbc/http/models"
 	"test-lbc/pkg"
 	fModels "test-lbc/pkg/models"
+	"test-lbc/prometheus"
 
 	"github.com/gin-gonic/gin"
 )
 
+type FizzBuzzService interface {
+	Run(params fModels.FizzBuzzParams) ([]string, error)
+	GetMostRequested() (*fModels.FizzBuzzStats, error)
+}
+
+var serviceFactory = func(db *sql.DB) FizzBuzzService {
+	return pkg.NewFizzBuzzService(db)
+}
+
 func FizzBuzzRun(c *gin.Context, db *sql.DB) {
+	prometheus.IncRequest("run")
 	params, errMes := getFizzBuzzParams(c)
 	if len(errMes) > 0 {
+		prometheus.IncStats("run", "error")
+		log.Println("failed to run fizzbuzz:")
+		for _, err := range errMes {
+			log.Println("\t", err)
+		}
 		c.AbortWithStatusJSON(http.StatusBadRequest, models.ResponseError{
 			Errors: errMes,
 		})
 		return
 	}
-	c.JSON(http.StatusOK, models.ResponseSuccess{
-		Data: pkg.NewFizzBuzzService(db).Run(*params),
-	})
+
+	result, err := serviceFactory(db).Run(*params)
+	if err != nil {
+		log.Printf("failed to save stats: %v", err)
+		prometheus.IncStats("run", "error_on_stat_save")
+	} else {
+		prometheus.IncStats("run", "success")
+	}
+
+	c.JSON(http.StatusOK, result)
 }
 
 func FizzBuzzStats(c *gin.Context, db *sql.DB) {
-	mostRequested, err := pkg.NewFizzBuzzService(db).GetMostRequested()
+	prometheus.IncRequest("stats")
+	mostRequested, err := serviceFactory(db).GetMostRequested()
 	if err != nil {
+		prometheus.IncStats("stats", "error")
+		log.Printf("failed to retrieve fizzbuzz stats: %v", err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ResponseError{
 			Errors: []string{err.Error()},
 		})
 		return
 	}
-	c.JSON(http.StatusOK, models.ResponseSuccess{
-		Data: mostRequested,
-	})
+
+	prometheus.IncStats("stats", "success")
+	c.JSON(http.StatusOK, mostRequested)
 }
 
 func getFizzBuzzParams(c *gin.Context) (*fModels.FizzBuzzParams, []string) {
@@ -64,6 +91,10 @@ func getFizzBuzzParams(c *gin.Context) (*fModels.FizzBuzzParams, []string) {
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		errMes = append(errMes, "limit err: "+err.Error())
+	}
+
+	if limit <= 0 {
+		errMes = append(errMes, "limit must be greater than 0")
 	}
 
 	return &fModels.FizzBuzzParams{
