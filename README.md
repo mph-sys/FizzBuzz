@@ -11,21 +11,25 @@ This project is a CLI application built with [Cobra](https://github.com/spf13/co
 ### Build
 
 ```bash
-go build -o test-lbc
+go build -o fizzbuzz-service
 ```
 
 ### Run HTTP Server
 
 The application exposes a `http-server` command to start the REST API.
+It requires the environment variables `MYSQL_USER` and `MYSQL_PASSWORD` to be set to connect to the database.
 
 ```bash
-./test-lbc http-server --mysql-dsn "user:password@tcp(localhost:3306)/dbname"
+export MYSQL_USER=user
+export MYSQL_PASSWORD=password
+./fizzbuzz-service http-server --mysql-db dbname --mysql-host localhost
 ```
 
 #### Flags
 
 - `--mysql-dsn` (string): MySQL Data Source Name (required for persistence).
 - `--bind-addr`, `-b` (string): Address to bind the server to (default ":8080").
+- `--prometheus-bind-addr` (string): Address to bind the prometheus metrics server to (default ":2112").
 
 ## Features
 

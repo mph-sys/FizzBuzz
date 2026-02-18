@@ -72,30 +72,24 @@ paths:
 components:
   schemas:
     ResponseSuccessStringArray:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: string
+      type: array
+      items:
+        type: string
     ResponseSuccessStats:
       type: object
       properties:
-        data:
-          type: object
-          properties:
-            int1:
-              type: integer
-            int2:
-              type: integer
-            limit:
-              type: integer
-            str1:
-              type: string
-            str2:
-              type: string
-            hits:
-              type: integer
+        int1:
+          type: integer
+        int2:
+          type: integer
+        limit:
+          type: integer
+        str1:
+          type: string
+        str2:
+          type: string
+        hits:
+          type: integer
     ResponseError:
       type: object
       properties:
