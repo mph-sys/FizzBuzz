@@ -40,6 +40,12 @@ func (s FizzBuzzService) Run(params models.FizzBuzzParams) ([]string, error) {
 	}
 
 	for i := range result {
+		// NOTE:
+		// 		1. the commented code describes a behaviour where we replace the value with "str1str2" when multiples of int1*int2 are encountered
+		//		2. the running code describes a behaviour where we replace the value with "str1str2" when multiples of int1 and int2 are encountered
+		// both algorithm solves the original fizzbuzz BUT both have a different behaviour when int1 == int2
+		// the test expressed "all multiples of int1 and int2 are replaced by str1str2" so I went with the second algorithm and commented what seems to be more constant with the original fizz-buzz
+
 		// switch {
 		// case currentValue%(int1TestValue*int2TestValue) == 0:
 		// 	result[i] = params.Str1 + params.Str2
@@ -50,6 +56,7 @@ func (s FizzBuzzService) Run(params models.FizzBuzzParams) ([]string, error) {
 		// default:
 		// 	result[i] = strconv.Itoa(currentValue)
 		// }
+
 		if currentValue%int1TestValue == 0 {
 			result[i] = params.Str1
 		}
